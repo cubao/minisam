@@ -1,3 +1,11 @@
+
+
+```
+conda install -y eigen sophus suitesparse
+```
+
+---
+
 miniSAM
 =====
 

@@ -8,6 +8,10 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 # for configure_package_config_file
 include(CMakePackageConfigHelpers)
 
+set(CONDA_PREFIX $ENV{CONDA_PREFIX})
+list(APPEND CMAKE_PREFIX_PATH ${CONDA_PREFIX})
+include_directories(${CONDA_PREFIX}/include)
+link_directories(${CONDA_PREFIX}/lib)
 
 # --------------------------------------
 # options
@@ -19,7 +23,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # python python wrapper
-option(MINISAM_BUILD_PYTHON_PACKAGE "Build wrapper for Python package" OFF)
+option(MINISAM_BUILD_PYTHON_PACKAGE "Build wrapper for Python package" ON)
 
 # shared or static lib
 option(MINISAM_BUILD_SHARED_LIB "Build shared lib if ON, static lib if OFF" ON)
@@ -60,11 +64,11 @@ endif()
 
 # GNU gcc
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Werror -Wextra")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra")
   
 # Clang
 elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Werror -Wextra")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra")
 
 # Visual stdio
 elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
@@ -76,6 +80,8 @@ endif()
 if(WIN32 AND MINISAM_BUILD_SHARED_LIB)
   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS 1)
 endif()
+
+add_definitions(-DSOPHUS_USE_BASIC_LOGGING)
 
 # --------------------------------------
 # dependencies
@@ -93,7 +99,7 @@ include_directories(AFTER ${EIGEN3_INCLUDE_DIR})
 # optional dependency: Sophus
 
 if(MINISAM_WITH_SOPHUS)
-  find_package(Sophus)
+  find_package(Sophus REQUIRED)
   message(STATUS "Search Dependency: Sophus")
 
   if(Sophus_FOUND)
@@ -116,7 +122,7 @@ endif()
 
 if(MINISAM_WITH_CHOLMOD)
   message(STATUS "Search Dependency: Cholmod")
-  find_package(Cholmod)
+  find_package(Cholmod REQUIRED)
 
   if(CHOLMOD_FOUND)
     set(MINISAM_USE_CHOLMOD 1)  # This will go into config.h
@@ -138,7 +144,7 @@ endif()
 
 if(MINISAM_WITH_SPQR)
   message(STATUS "Search Dependency: SPQR")
-  find_package(SPQR)
+  find_package(SPQR REQUIRED)
 
   if(SPQR_FOUND)
     set(MINISAM_USE_SPQR 1)  # This will go into config.h
