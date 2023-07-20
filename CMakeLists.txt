@@ -91,7 +91,7 @@ set(MINISAM_ADDITIONAL_LIBRARIES)
 
 # mandatory dependency: Eigen3
 message(STATUS "Search Dependency: Eigen3")
-find_package(Eigen3 REQUIRED 3.3.0)
+find_package(Eigen3 REQUIRED 3.4.0)
 include_directories(AFTER ${EIGEN3_INCLUDE_DIR})
 
 
@@ -110,10 +110,12 @@ if(MINISAM_WITH_SOPHUS)
   else()
     message(WARNING "Using Sophus is set, but Sophus is NOT found. Sophus will not be used")
     set(MINISAM_USE_SOPHUS 0)
+    message(FATAL_ERROR "must have sophus")
 
   endif()
 else()
   set(MINISAM_USE_SOPHUS 0)
+  message(FATAL_ERROR "must have sophus")
 endif()
 
 

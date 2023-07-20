@@ -1,6 +1,7 @@
 PROJECT_SOURCE_DIR ?= $(abspath ./)
 PROJECT_NAME ?= $(shell basename $(PROJECT_SOURCE_DIR))
 BUILD_DIR ?= $(PROJECT_SOURCE_DIR)/build
+NUM_JOBS ?= 8
 
 PYTHON_EXECUTABLE ?= $(shell which python3)
 
@@ -8,6 +9,14 @@ all:
 	@echo nothing special
 clean:
 	rm -rf $(BUILD_DIR)
+
+build:
+	mkdir -p $(BUILD_DIR) && cd $(BUILD_DIR) && \
+	cmake $(PROJECT_SOURCE_DIR) && \
+	make -j$(NUM_JOBS) && \
+	make python_package install
+
+.PHONY: build
 
 docs_build:
 	mkdocs build

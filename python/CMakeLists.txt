@@ -109,5 +109,6 @@ else()
 endif()
 
 # install by python `python setup.py install`
+install(CODE "execute_process(COMMAND ${PYTHON_EXECUTABLE} setup.py bdist_wheel)")
 install(CODE "execute_process(COMMAND ${PYTHON_EXECUTABLE} setup.py install)")
 
