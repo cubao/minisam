@@ -25,11 +25,8 @@ if(NOT CMAKE_BUILD_TYPE)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS Debug Release RelWithDebInfo MinSizeRel)
 endif()
 
-# python python wrapper
-option(MINISAM_BUILD_PYTHON_PACKAGE "Build wrapper for Python package" ON)
-
 # shared or static lib
-option(MINISAM_BUILD_SHARED_LIB "Build shared lib if ON, static lib if OFF" ON)
+option(MINISAM_BUILD_SHARED_LIB "Build shared lib if ON, static lib if OFF" OFF)
 
 # enable multi-threading
 option(MINISAM_WITH_MULTI_THREADS "Enable multi-threading if ON, otherwise OFF" OFF)
@@ -51,11 +48,6 @@ option(MINISAM_WITH_SPQR "Enable/Disable SuiteSparse SPQR solver" ON)
 
 # --------------------------------------
 # configuration conflict
-
-# python wrapper cannot be compiled with static lib, since static lib is compiled without -fPIC
-if(MINISAM_BUILD_PYTHON_PACKAGE AND NOT MINISAM_BUILD_SHARED_LIB)
-  message(FATAL_ERROR "Python wrapper cannot be compiled with static lib" )
-endif()
 
 # --------------------------------------
 # default compiler flags
@@ -177,29 +169,6 @@ add_subdirectory(tests)
 
 # C++ examples
 add_subdirectory(examples/cpp)
-
-
-# --------------------------------------
-# python module
-
-if(MINISAM_BUILD_PYTHON_PACKAGE)
-
-  # clone git submodule
-  find_package(Git QUIET)
-  if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
-    message(STATUS "git submodule update: pybind11")
-    execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
-                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                    RESULT_VARIABLE GIT_SUBMOD_RESULT)
-    if(NOT GIT_SUBMOD_RESULT EQUAL "0")
-      message(FATAL_ERROR "git submodule update --init failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
-    endif()
-  endif()
-
-  # python wrapper compile and install
-  add_subdirectory(python)
-endif()
-
 
 # --------------------------------------
 # summary

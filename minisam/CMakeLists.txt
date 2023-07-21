@@ -102,13 +102,16 @@ configure_package_config_file(
 install(EXPORT ${PROJECT_NAME}-export DESTINATION ${CMAKE_CONFIG_DEST} FILE "${PROJECT_NAME}-export.cmake" )
 install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config.cmake" DESTINATION ${CMAKE_CONFIG_DEST})
 
-
-# file(GLOB MINISAM_WRAPPER_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "minisam_wrapper/*.cpp")
-
 add_subdirectory(3rdparty/pybind11 ${PROJECT_BINARY_DIR}/pybind11)
-# pybind11_add_module(_pybind11_rdp src/main.cpp)
+file(GLOB_RECURSE
+  MINISAM_WRAPPER_SRCS
+  RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 
+  minisam_wrapper/*.cpp
+  sophus_wrapper/*.cpp
+)
+pybind11_add_module(_pybind11_minisam ${MINISAM_WRAPPER_SRCS})
 
-# EXAMPLE_VERSION_INFO is defined by setup.py and passed into the C++ code as a
-# define (VERSION_INFO) here.
-# target_compile_definitions(_pybind11_rdp
-#                            PRIVATE VERSION_INFO=${EXAMPLE_VERSION_INFO})
+# target_include_directories(_pybind11_minisam PRIVATE ${HEADER_ROOT})
+target_link_libraries(_pybind11_minisam PRIVATE ${PROJECT_NAME})
+target_compile_definitions(_pybind11_minisam
+                           PRIVATE VERSION_INFO=${EXAMPLE_VERSION_INFO})
