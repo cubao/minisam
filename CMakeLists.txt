@@ -81,8 +81,6 @@ if(WIN32 AND MINISAM_BUILD_SHARED_LIB)
   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS 1)
 endif()
 
-add_definitions(-DSOPHUS_USE_BASIC_LOGGING)
-
 # --------------------------------------
 # dependencies
 
@@ -98,26 +96,11 @@ include_directories(AFTER ${EIGEN3_INCLUDE_DIR})
 # --------------------------------------
 # optional dependency: Sophus
 
-if(MINISAM_WITH_SOPHUS)
-  find_package(Sophus REQUIRED)
-  message(STATUS "Search Dependency: Sophus")
-
-  if(Sophus_FOUND)
-    set(MINISAM_USE_SOPHUS 1)
-    get_target_property(Sophus_INCLUDE_DIR Sophus::Sophus INTERFACE_INCLUDE_DIRECTORIES)
-    include_directories(AFTER ${Sophus_INCLUDE_DIR})
-
-  else()
-    message(WARNING "Using Sophus is set, but Sophus is NOT found. Sophus will not be used")
-    set(MINISAM_USE_SOPHUS 0)
-    message(FATAL_ERROR "must have sophus")
-
-  endif()
-else()
-  set(MINISAM_USE_SOPHUS 0)
-  message(FATAL_ERROR "must have sophus")
-endif()
-
+add_definitions(-DSOPHUS_USE_BASIC_LOGGING)
+set(MINISAM_WITH_SOPHUS 1)
+set(MINISAM_USE_SOPHUS 1)
+set(Sophus_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/minisam/3rdparty)
+include_directories(AFTER ${Sophus_INCLUDE_DIR})
 
 # --------------------------------------
 # optional dependency: SuiteSparse CHOLMOD solver

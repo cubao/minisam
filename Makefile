@@ -1,6 +1,7 @@
 PROJECT_SOURCE_DIR ?= $(abspath ./)
 PROJECT_NAME ?= $(shell basename $(PROJECT_SOURCE_DIR))
 BUILD_DIR ?= $(PROJECT_SOURCE_DIR)/build
+INSTALL_DIR ?= $(BUILD_DIR)/install
 NUM_JOBS ?= 8
 
 PYTHON_EXECUTABLE ?= $(shell which python3)
@@ -12,7 +13,7 @@ clean:
 
 build:
 	mkdir -p $(BUILD_DIR) && cd $(BUILD_DIR) && \
-	cmake $(PROJECT_SOURCE_DIR) && \
+	cmake $(PROJECT_SOURCE_DIR) -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) && \
 	make -j$(NUM_JOBS) && \
 	make python_package install
 
