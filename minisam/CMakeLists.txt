@@ -1,9 +1,3 @@
-# build lib
-
-# --------------------------------------
-# source for lib
-
-# core sub-folders for source and headers
 set(MINISAM_SUBDIRS
   core
   linear
@@ -11,16 +5,8 @@ set(MINISAM_SUBDIRS
   utils
 )
 
-# add multi-view geometry and SLAM module if selected
-if(MINISAM_USE_SOPHUS)
-  list(APPEND MINISAM_SUBDIRS geometry)
-  list(APPEND MINISAM_SUBDIRS slam)
-endif()
-
-# add CUDA module if selected
-if(MINISAM_USE_CUSOLVER)
-  list(APPEND MINISAM_SUBDIRS linear/cuda)
-endif()
+list(APPEND MINISAM_SUBDIRS geometry)
+list(APPEND MINISAM_SUBDIRS slam)
 
 # add SuiteSparse module if selected
 if(MINISAM_USE_CHOLMOD)

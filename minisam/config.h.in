@@ -19,9 +19,6 @@
 // Whether use Sophus
 #cmakedefine MINISAM_USE_SOPHUS
 
-// Whether use CUDA cuSOLVER
-#cmakedefine MINISAM_USE_CUSOLVER
-
 // Whether use SuiteSparse CHOLMOD solver
 #cmakedefine MINISAM_USE_CHOLMOD
 

@@ -41,11 +41,6 @@ set(MINISAM_WITH_MULTI_THREADS_NUM "4" CACHE STRING "Number of threads to use if
 option(MINISAM_WITH_INTERNAL_TIMING "Enable internal profiling if ON, otherwise OFF" OFF)
 
 # enable optional dependencies
-# use Sophus
-option(MINISAM_WITH_SOPHUS "Enable/Disable Sophus" ON)
-
-# use CUDA cuSOLVER
-option(MINISAM_WITH_CUSOLVER "Enable/Disable CUDA cuSOLVER" OFF)
 
 # use SuiteSparse CHOLMOD solver
 option(MINISAM_WITH_CHOLMOD "Enable/Disable SuiteSparse CHOLMOD solver" ON)
@@ -150,53 +145,6 @@ endif()
 
 
 # --------------------------------------
-# optional dependency: cusolver
-
-if(MINISAM_WITH_CUSOLVER)
-  # optional dependency: CUDA
-  message(STATUS "Search Dependency: CUDA")
-  find_package(CUDA)
-
-  if(CUDA_FOUND)
-    # optional dependency: cusolver in CUDA >= 8.0 with GCC requires OpenMP
-    if((NOT (${CUDA_VERSION_MAJOR} LESS 8)) AND (CMAKE_CXX_COMPILER_ID MATCHES "GNU"))
-      message(STATUS "Search Dependency: OpenMP")
-      find_package(OpenMP)
-
-      if(OpenMP_FOUND)
-        message(STATUS "CUDA and OpenMP found (with GCC): use cuSOLVER")
-        set(MINISAM_USE_CUSOLVER 1)   # This will go into config.h
-        # CUDA
-        include_directories(AFTER ${CUDA_INCLUDE_DIRS})
-        list(APPEND MINISAM_ADDITIONAL_LIBRARIES
-            ${CUDA_LIBRARIES} ${CUDA_cusparse_LIBRARY} ${CUDA_cusolver_LIBRARY})
-        # OpenMP compiler flags
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-
-      else()
-        message(WARNING "Using cuSOLVER is set, but OpenMP is NOT found. cuSOLVER will not be used (with GCC)")
-        set(MINISAM_USE_CUSOLVER 0)  # This will go into config.h
-      endif()
-
-    else()
-      message(STATUS "CUDA found: use cuSOLVER")
-      set(MINISAM_USE_CUSOLVER 1)  # This will go into config.h
-      # CUDA
-      include_directories(AFTER ${CUDA_INCLUDE_DIRS})
-      list(APPEND MINISAM_ADDITIONAL_LIBRARIES
-          ${CUDA_LIBRARIES} ${CUDA_cusparse_LIBRARY} ${CUDA_cusolver_LIBRARY})
-    endif()
-
-  else()
-    message(WARNING "Using cuSOLVER is set, but CUDA is NOT found. cuSOLVER will not be used")
-    set(MINISAM_USE_CUSOLVER 0)  # This will go into config.h
-  endif()
-else()
-  set(MINISAM_USE_CUSOLVER 0)  # This will go into config.h
-endif()
-
 # thread libs
 if(MINISAM_WITH_MULTI_THREADS)
   set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -314,12 +262,6 @@ if(MINISAM_USE_SPQR)
   message(STATUS "  SPQR                        Yes (${SPQR_INCLUDES})")
 else()
   message(STATUS "  SPQR                        No")
-endif()
-
-if(MINISAM_USE_CUSOLVER)
-  message(STATUS "  CUDA cuSOLVER               ${CUDA_VERSION} (${CUDA_INCLUDE_DIRS})")
-else()
-  message(STATUS "  CUDA cuSOLVER               No")
 endif()
 
 # python

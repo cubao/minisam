@@ -33,9 +33,6 @@ if(NOT MINISAM_USE_SOPHUS)
 endif()
 
 # optional solvers
-if(NOT MINISAM_USE_CUSOLVER)
-  list(APPEND EXCLUDED_UNIT_TESTS "testCUDASolver")
-endif()
 if(NOT MINISAM_USE_SPQR)
   list(APPEND EXCLUDED_UNIT_TESTS "testSPQR")
 endif()
