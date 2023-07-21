@@ -1,7 +1,7 @@
 
 # cloned dependency: pybind11
 # add path and search for python installed
-add_subdirectory(pybind11)
+add_subdirectory(../minisam/3rdparty/pybind11 ${PROJECT_BINARY_DIR}/pybind11)
 
 # --------------------------------------
 # wrap sophus
