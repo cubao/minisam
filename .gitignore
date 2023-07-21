@@ -1,6 +1,8 @@
 build*
+dist*
 CMakeLists.txt.user
 *.so
 *.a
 *.dylib
 *.dll
+*.egg-info/

@@ -14,10 +14,20 @@ clean:
 build:
 	mkdir -p $(BUILD_DIR) && cd $(BUILD_DIR) && \
 	cmake $(PROJECT_SOURCE_DIR) -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) && \
-	make -j$(NUM_JOBS) && \
-	make python_package install
-
+	make -j$(NUM_JOBS)
 .PHONY: build
+
+PYTHON ?= python3
+python_install:
+	$(PYTHON) setup.py install
+python_build:
+	$(PYTHON) setup.py bdist_wheel
+python_sdist:
+	$(PYTHON) setup.py sdist
+python_test:
+	python3 -m pip install pytest
+	pytest tests
+.PHONY: python_install python_build python_sdist python_test
 
 docs_build:
 	mkdocs build
