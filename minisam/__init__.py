@@ -1,11 +1,11 @@
-
 # wrapped c++ module
-from ._minisam_py_wrapper import *
+# from ._pybind11_minisam import *
+from .minisam_ import *
 
 
-# wrapped sophus c++ module if installed
-try:
-    from .sophus import *
-except ImportError:
-    pass
+# # wrapped sophus c++ module if installed
+# try:
+#     from .sophus import *
+# except ImportError:
+#     pass
 

@@ -6,3 +6,4 @@ CMakeLists.txt.user
 *.dylib
 *.dll
 *.egg-info/
+__pycache__

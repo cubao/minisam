@@ -18,6 +18,28 @@
 using namespace Sophus;
 namespace py = pybind11;
 
+#define STRINGIFY(x) #x
+#define MACRO_STRINGIFY(x) STRINGIFY(x)
+
+// parts
+
+// core, seperate variables and loss function for later flexibility
+void wrap_core(py::module& m);
+void wrap_variables(py::module& m);
+void wrap_factor(py::module& m);
+void wrap_loss_function(py::module& m);
+
+// multi-view geometry
+void wrap_geometry(py::module& m);
+
+// optimizer implementation
+void wrap_optimizer(py::module& m);
+
+// factors and slam utils
+void wrap_slam(py::module& m);
+
+// utils
+void wrap_utils(py::module& m);
 
 // convert Eigen::Vector2d between std::complex<double>
 inline Eigen::Vector2d complex_to_vector2(const std::complex<double>& c) {
@@ -60,7 +82,7 @@ inline std::complex<double> vector2_to_complex(const Eigen::Vector2d v) {
 
 
 // sophus module
-PYBIND11_MODULE(_minisam_sophus_py_wrapper, m) {
+PYBIND11_MODULE(_minisam, m) {
 
   // SO2
   py::class_<SO2d>(m, "SO2")
@@ -137,4 +159,18 @@ PYBIND11_MODULE(_minisam_sophus_py_wrapper, m) {
     WRAP_SOPHUS_TYPE_LIE_GROUP(SE3d)
     WRAP_SOPHUS_TYPE_PRINT(SE3d)
     ;
+
+  wrap_core(m);
+  wrap_variables(m);
+  wrap_factor(m);
+  wrap_loss_function(m);
+  wrap_geometry(m);
+  wrap_optimizer(m);
+  wrap_slam(m);
+  wrap_utils(m);
+#ifdef VERSION_INFO
+    m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
+#else
+    m.attr("__version__") = "dev";
+#endif
 }

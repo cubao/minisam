@@ -109,9 +109,9 @@ file(GLOB_RECURSE
   minisam_wrapper/*.cpp
   sophus_wrapper/*.cpp
 )
-pybind11_add_module(_pybind11_minisam ${MINISAM_WRAPPER_SRCS})
+pybind11_add_module(minisam_ ${MINISAM_WRAPPER_SRCS})
 
 # target_include_directories(_pybind11_minisam PRIVATE ${HEADER_ROOT})
-target_link_libraries(_pybind11_minisam PRIVATE ${PROJECT_NAME})
-target_compile_definitions(_pybind11_minisam
+target_link_libraries(minisam_ PRIVATE ${PROJECT_NAME})
+target_compile_definitions(minisam_
                            PRIVATE VERSION_INFO=${EXAMPLE_VERSION_INFO})
