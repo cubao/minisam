@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 3.4)
 enable_testing()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(CONDA_PREFIX $ENV{CONDA_PREFIX})
 set(CMAKE_PREFIX_PATH ${CONDA_PREFIX} ${CMAKE_PREFIX_PATH})
@@ -332,3 +333,11 @@ else()
 endif()
 
 message(STATUS " ")
+
+add_subdirectory(pybind11)
+pybind11_add_module(_pybind11_rdp src/main.cpp)
+
+# EXAMPLE_VERSION_INFO is defined by setup.py and passed into the C++ code as a
+# define (VERSION_INFO) here.
+target_compile_definitions(_pybind11_rdp
+                           PRIVATE VERSION_INFO=${EXAMPLE_VERSION_INFO})
