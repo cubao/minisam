@@ -102,11 +102,7 @@ if(WIN32)
 endif()
 
 # generate setup.py for distutils
-if(MINISAM_USE_SOPHUS)
-  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in" "${PROJECT_BINARY_DIR}/setup.py")
-else()
-  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/setup_no_sophus.py.in" "${PROJECT_BINARY_DIR}/setup.py")
-endif()
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in" "${PROJECT_BINARY_DIR}/setup.py")
 
 # install by python `python setup.py install`
 install(CODE "execute_process(COMMAND ${PYTHON_EXECUTABLE} setup.py bdist_wheel)")
