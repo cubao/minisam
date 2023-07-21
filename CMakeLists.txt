@@ -3,15 +3,17 @@ project(minisam LANGUAGES CXX)
 cmake_minimum_required(VERSION 3.4)
 enable_testing()
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+set(CONDA_PREFIX $ENV{CONDA_PREFIX})
+set(CMAKE_PREFIX_PATH ${CONDA_PREFIX} ${CMAKE_PREFIX_PATH})
+include_directories(${CONDA_PREFIX}/include)
+link_directories(${CONDA_PREFIX}/lib)
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 # for configure_package_config_file
 include(CMakePackageConfigHelpers)
-
-set(CONDA_PREFIX $ENV{CONDA_PREFIX})
-list(APPEND CMAKE_PREFIX_PATH ${CONDA_PREFIX})
-include_directories(${CONDA_PREFIX}/include)
-link_directories(${CONDA_PREFIX}/lib)
 
 # --------------------------------------
 # options
