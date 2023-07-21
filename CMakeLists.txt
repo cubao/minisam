@@ -3,11 +3,18 @@ project(minisam LANGUAGES CXX)
 cmake_minimum_required(VERSION 3.4)
 enable_testing()
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+set(CONDA_PREFIX $ENV{CONDA_PREFIX})
+set(CMAKE_PREFIX_PATH ${CONDA_PREFIX} ${CMAKE_PREFIX_PATH})
+include_directories(${CONDA_PREFIX}/include)
+link_directories(${CONDA_PREFIX}/lib)
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 # for configure_package_config_file
 include(CMakePackageConfigHelpers)
-
 
 # --------------------------------------
 # options
@@ -18,11 +25,8 @@ if(NOT CMAKE_BUILD_TYPE)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS Debug Release RelWithDebInfo MinSizeRel)
 endif()
 
-# python python wrapper
-option(MINISAM_BUILD_PYTHON_PACKAGE "Build wrapper for Python package" OFF)
-
 # shared or static lib
-option(MINISAM_BUILD_SHARED_LIB "Build shared lib if ON, static lib if OFF" ON)
+option(MINISAM_BUILD_SHARED_LIB "Build shared lib if ON, static lib if OFF" OFF)
 
 # enable multi-threading
 option(MINISAM_WITH_MULTI_THREADS "Enable multi-threading if ON, otherwise OFF" OFF)
@@ -34,11 +38,6 @@ set(MINISAM_WITH_MULTI_THREADS_NUM "4" CACHE STRING "Number of threads to use if
 option(MINISAM_WITH_INTERNAL_TIMING "Enable internal profiling if ON, otherwise OFF" OFF)
 
 # enable optional dependencies
-# use Sophus
-option(MINISAM_WITH_SOPHUS "Enable/Disable Sophus" ON)
-
-# use CUDA cuSOLVER
-option(MINISAM_WITH_CUSOLVER "Enable/Disable CUDA cuSOLVER" OFF)
 
 # use SuiteSparse CHOLMOD solver
 option(MINISAM_WITH_CHOLMOD "Enable/Disable SuiteSparse CHOLMOD solver" ON)
@@ -50,21 +49,16 @@ option(MINISAM_WITH_SPQR "Enable/Disable SuiteSparse SPQR solver" ON)
 # --------------------------------------
 # configuration conflict
 
-# python wrapper cannot be compiled with static lib, since static lib is compiled without -fPIC
-if(MINISAM_BUILD_PYTHON_PACKAGE AND NOT MINISAM_BUILD_SHARED_LIB)
-  message(FATAL_ERROR "Python wrapper cannot be compiled with static lib" )
-endif()
-
 # --------------------------------------
 # default compiler flags
 
 # GNU gcc
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Werror -Wextra")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra")
   
 # Clang
 elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Werror -Wextra")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra")
 
 # Visual stdio
 elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
@@ -85,38 +79,25 @@ set(MINISAM_ADDITIONAL_LIBRARIES)
 
 # mandatory dependency: Eigen3
 message(STATUS "Search Dependency: Eigen3")
-find_package(Eigen3 REQUIRED 3.3.0)
+find_package(Eigen3 REQUIRED 3.4.0)
 include_directories(AFTER ${EIGEN3_INCLUDE_DIR})
 
 
 # --------------------------------------
 # optional dependency: Sophus
 
-if(MINISAM_WITH_SOPHUS)
-  find_package(Sophus)
-  message(STATUS "Search Dependency: Sophus")
-
-  if(Sophus_FOUND)
-    set(MINISAM_USE_SOPHUS 1)
-    get_target_property(Sophus_INCLUDE_DIR Sophus::Sophus INTERFACE_INCLUDE_DIRECTORIES)
-    include_directories(AFTER ${Sophus_INCLUDE_DIR})
-
-  else()
-    message(WARNING "Using Sophus is set, but Sophus is NOT found. Sophus will not be used")
-    set(MINISAM_USE_SOPHUS 0)
-
-  endif()
-else()
-  set(MINISAM_USE_SOPHUS 0)
-endif()
-
+add_definitions(-DSOPHUS_USE_BASIC_LOGGING)
+set(MINISAM_WITH_SOPHUS 1)
+set(MINISAM_USE_SOPHUS 1)
+set(Sophus_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/minisam/3rdparty)
+include_directories(AFTER ${Sophus_INCLUDE_DIR})
 
 # --------------------------------------
 # optional dependency: SuiteSparse CHOLMOD solver
 
 if(MINISAM_WITH_CHOLMOD)
   message(STATUS "Search Dependency: Cholmod")
-  find_package(Cholmod)
+  find_package(Cholmod REQUIRED)
 
   if(CHOLMOD_FOUND)
     set(MINISAM_USE_CHOLMOD 1)  # This will go into config.h
@@ -138,7 +119,7 @@ endif()
 
 if(MINISAM_WITH_SPQR)
   message(STATUS "Search Dependency: SPQR")
-  find_package(SPQR)
+  find_package(SPQR REQUIRED)
 
   if(SPQR_FOUND)
     set(MINISAM_USE_SPQR 1)  # This will go into config.h
@@ -156,53 +137,6 @@ endif()
 
 
 # --------------------------------------
-# optional dependency: cusolver
-
-if(MINISAM_WITH_CUSOLVER)
-  # optional dependency: CUDA
-  message(STATUS "Search Dependency: CUDA")
-  find_package(CUDA)
-
-  if(CUDA_FOUND)
-    # optional dependency: cusolver in CUDA >= 8.0 with GCC requires OpenMP
-    if((NOT (${CUDA_VERSION_MAJOR} LESS 8)) AND (CMAKE_CXX_COMPILER_ID MATCHES "GNU"))
-      message(STATUS "Search Dependency: OpenMP")
-      find_package(OpenMP)
-
-      if(OpenMP_FOUND)
-        message(STATUS "CUDA and OpenMP found (with GCC): use cuSOLVER")
-        set(MINISAM_USE_CUSOLVER 1)   # This will go into config.h
-        # CUDA
-        include_directories(AFTER ${CUDA_INCLUDE_DIRS})
-        list(APPEND MINISAM_ADDITIONAL_LIBRARIES
-            ${CUDA_LIBRARIES} ${CUDA_cusparse_LIBRARY} ${CUDA_cusolver_LIBRARY})
-        # OpenMP compiler flags
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-
-      else()
-        message(WARNING "Using cuSOLVER is set, but OpenMP is NOT found. cuSOLVER will not be used (with GCC)")
-        set(MINISAM_USE_CUSOLVER 0)  # This will go into config.h
-      endif()
-
-    else()
-      message(STATUS "CUDA found: use cuSOLVER")
-      set(MINISAM_USE_CUSOLVER 1)  # This will go into config.h
-      # CUDA
-      include_directories(AFTER ${CUDA_INCLUDE_DIRS})
-      list(APPEND MINISAM_ADDITIONAL_LIBRARIES
-          ${CUDA_LIBRARIES} ${CUDA_cusparse_LIBRARY} ${CUDA_cusolver_LIBRARY})
-    endif()
-
-  else()
-    message(WARNING "Using cuSOLVER is set, but CUDA is NOT found. cuSOLVER will not be used")
-    set(MINISAM_USE_CUSOLVER 0)  # This will go into config.h
-  endif()
-else()
-  set(MINISAM_USE_CUSOLVER 0)  # This will go into config.h
-endif()
-
 # thread libs
 if(MINISAM_WITH_MULTI_THREADS)
   set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -235,29 +169,6 @@ add_subdirectory(tests)
 
 # C++ examples
 add_subdirectory(examples/cpp)
-
-
-# --------------------------------------
-# python module
-
-if(MINISAM_BUILD_PYTHON_PACKAGE)
-
-  # clone git submodule
-  find_package(Git QUIET)
-  if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
-    message(STATUS "git submodule update: pybind11")
-    execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
-                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                    RESULT_VARIABLE GIT_SUBMOD_RESULT)
-    if(NOT GIT_SUBMOD_RESULT EQUAL "0")
-      message(FATAL_ERROR "git submodule update --init failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
-    endif()
-  endif()
-
-  # python wrapper compile and install
-  add_subdirectory(python)
-endif()
-
 
 # --------------------------------------
 # summary
@@ -320,12 +231,6 @@ if(MINISAM_USE_SPQR)
   message(STATUS "  SPQR                        Yes (${SPQR_INCLUDES})")
 else()
   message(STATUS "  SPQR                        No")
-endif()
-
-if(MINISAM_USE_CUSOLVER)
-  message(STATUS "  CUDA cuSOLVER               ${CUDA_VERSION} (${CUDA_INCLUDE_DIRS})")
-else()
-  message(STATUS "  CUDA cuSOLVER               No")
 endif()
 
 # python

@@ -1,0 +1,3 @@
+include README.md LICENSE
+graft minisam
+global-include CMakeLists.txt *.cmake

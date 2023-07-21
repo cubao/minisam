@@ -7,8 +7,8 @@ from minisam import *
 import numpy as np
 import sys
 
-
-filename = "../data/problem-49-7776-pre.txt";
+PWD = os.path.abspath(os.path.dirname(__file__))
+filename = f"{PWD}/../data/problem-49-7776-pre.txt";
 
 if len(sys.argv) == 2:
     filename = sys.argv[1]

@@ -1,9 +1,3 @@
-# build lib
-
-# --------------------------------------
-# source for lib
-
-# core sub-folders for source and headers
 set(MINISAM_SUBDIRS
   core
   linear
@@ -11,16 +5,8 @@ set(MINISAM_SUBDIRS
   utils
 )
 
-# add multi-view geometry and SLAM module if selected
-if(MINISAM_USE_SOPHUS)
-  list(APPEND MINISAM_SUBDIRS geometry)
-  list(APPEND MINISAM_SUBDIRS slam)
-endif()
-
-# add CUDA module if selected
-if(MINISAM_USE_CUSOLVER)
-  list(APPEND MINISAM_SUBDIRS linear/cuda)
-endif()
+list(APPEND MINISAM_SUBDIRS geometry)
+list(APPEND MINISAM_SUBDIRS slam)
 
 # add SuiteSparse module if selected
 if(MINISAM_USE_CHOLMOD)
@@ -115,3 +101,17 @@ configure_package_config_file(
 # install config
 install(EXPORT ${PROJECT_NAME}-export DESTINATION ${CMAKE_CONFIG_DEST} FILE "${PROJECT_NAME}-export.cmake" )
 install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config.cmake" DESTINATION ${CMAKE_CONFIG_DEST})
+
+add_subdirectory(3rdparty/pybind11 ${PROJECT_BINARY_DIR}/pybind11)
+file(GLOB_RECURSE
+  MINISAM_WRAPPER_SRCS
+  RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} 
+  minisam_wrapper/*.cpp
+  sophus_wrapper/*.cpp
+)
+pybind11_add_module(minisam_ ${MINISAM_WRAPPER_SRCS})
+
+# target_include_directories(_pybind11_minisam PRIVATE ${HEADER_ROOT})
+target_link_libraries(minisam_ PRIVATE ${PROJECT_NAME})
+target_compile_definitions(minisam_
+                           PRIVATE VERSION_INFO=${EXAMPLE_VERSION_INFO})

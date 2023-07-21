@@ -19,10 +19,6 @@
 #include <minisam/utils/Timer.h>
 
 // non-default solvers
-#ifdef MINISAM_USE_CUSOLVER
-#include <minisam/linear/cuda/CUDASolver.h>
-#endif
-
 #ifdef MINISAM_USE_CHOLMOD
 #include <minisam/linear/cholmod/Cholmod.h>
 #endif
@@ -83,13 +79,9 @@ NonlinearOptimizer::NonlinearOptimizer(const NonlinearOptimizerParams& params)
     } break;
 
     case LinearSolverType::CUDA_CHOLESKY: {
-#ifdef MINISAM_USE_CUSOLVER
-      linear_solver_ = unique_ptr<SparseLinearSolver>(new CUDACholeskySolver());
-#else
       throw invalid_argument(
           "[NonlinearOptimizer] Cannot use CUDA Cholesky Solver, since miniSAM "
           "is not compiled with CUDA");
-#endif
     } break;
 
     case LinearSolverType::SCHUR_DENSE_CHOLESKY: {
