@@ -1,6 +1,6 @@
 ```
 make test_in_dev_container
-conda install -y eigen sophus suitesparse
+conda install -y eigen suitesparse
 make build
 ```
 

@@ -158,7 +158,7 @@ class SE2Base {
   ///
   SOPHUS_FUNC SE2<Scalar> inverse() const {
     SO2<Scalar> const invR = so2().inverse();
-    return SE2<Scalar>(invR, invR * (translation() * Scalar(-1)));
+    return SE2<Scalar>(invR, invR.matrix() * (translation() * Scalar(-1)));
   }
 
   /// Logarithmic map

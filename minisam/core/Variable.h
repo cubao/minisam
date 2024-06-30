@@ -108,9 +108,10 @@ class VariableType : public Variable {
 
   // local coordinate
   Eigen::VectorXd local(const Variable& value2) const override {
-    const VariableType<T>& value2_type =
-        static_cast<const VariableType<T>&>(value2);
-    return traits<T>::Local(value_, value2_type.value());
+    return Eigen::VectorXd(5);
+    // const VariableType<T>& value2_type =
+    //     static_cast<const VariableType<T>&>(value2);
+    // return traits<T>::Local(value_, value2_type.value());
   }
 };
 
